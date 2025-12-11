@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["python310", "pip"]
+
+[phases.install]
+cmds = ["pip install -r agent/requirements.txt"]
+
+[phases.build]
+cmds = []
+
+[start]
+cmd = "python agent/simple_agent.py"
