@@ -12,8 +12,12 @@ class PaymentAgent:
         self.w3 = Web3(Web3.HTTPProvider(os.getenv('CRONOS_RPC')))
         self.account = Account.from_key(os.getenv('PRIVATE_KEY'))
 
-        with open('../config/networks.json') as f:
-            self.config = json.load(f)
+        config_path = os.path.join(os.path.dirname(__file__), '../config/networks.json')
+        if os.path.exists(config_path):
+            with open(config_path) as f:
+                self.config = json.load(f)
+        else:
+            self.config = {}
 
         self.payment_agent_address = os.getenv('PAYMENT_AGENT_ADDRESS')
         self.x402_executor_address = os.getenv('X402_EXECUTOR_ADDRESS')
@@ -25,7 +29,10 @@ class PaymentAgent:
         )
 
     def _load_abi(self, contract_name):
-        abi_path = f'../artifacts/contracts/{contract_name}.sol/{contract_name}.json'
+        abi_path = os.path.join(os.path.dirname(__file__), f'../artifacts/contracts/{contract_name}.sol/{contract_name}.json')
+        if not os.path.exists(abi_path):
+            print(f"Warning: ABI file not found at {abi_path}")
+            return []
         with open(abi_path) as f:
             artifact = json.load(f)
             return artifact['abi']

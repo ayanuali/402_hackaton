@@ -1,1 +1,1 @@
-worker: cd agent && python agent.py
+worker: pip install -r agent/requirements.txt && python agent/agent.py
