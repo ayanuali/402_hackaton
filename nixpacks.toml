@@ -2,7 +2,7 @@
 nixPkgs = ["python311"]
 
 [phases.install]
-cmds = ["pip install -r agent/requirements.txt"]
+cmds = ["python -m pip install -r agent/requirements.txt"]
 
 [phases.build]
 cmds = []
