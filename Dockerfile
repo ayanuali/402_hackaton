@@ -2,14 +2,12 @@ FROM python:3.11
 
 WORKDIR /app
 
-# Copy requirements first for better caching
-COPY agent/requirements.txt ./agent/
+# Copy requirements and install dependencies
+COPY agent/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install dependencies
-RUN pip install --no-cache-dir -r agent/requirements.txt
-
-# Copy the rest of the application
-COPY agent/ ./agent/
+# Copy agent code directly to /app
+COPY agent/simple_agent.py .
 
 # Run the agent
-CMD ["python", "agent/simple_agent.py"]
+CMD ["python", "simple_agent.py"]
