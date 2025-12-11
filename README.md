@@ -84,3 +84,11 @@ python cli.py
 5. User pays no gas (x402 handles it)
 
 Built for Cronos x402 PayTech Hackathon.
+
+## Live Demo
+
+**Frontend:** https://402-hackaton.vercel.app/
+
+**Contracts on Cronos Testnet:**
+- PaymentAgent: `0x938C237a5A1F753fc1770960c31f1FD26D548bAc`
+- X402Executor: `0x93d296EE43EEB00A7DE563d35B2c84283DEA47f6`
