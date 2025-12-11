@@ -38,7 +38,7 @@ contract PaymentAgent {
             recipient: recipient,
             amount: amount,
             interval: interval,
-            lastExecution: block.timestamp,
+            lastExecution: 0,
             active: true,
             condition: condition
         });

@@ -63,7 +63,8 @@ describe("PaymentAgent", function () {
       "Daily payment"
     );
 
-    await paymentAgent.executePayment(user.address, 0);
+    const firstExecution = await paymentAgent.executePayment(user.address, 0);
+    await firstExecution.wait();
 
     await expect(
       paymentAgent.executePayment(user.address, 0)
