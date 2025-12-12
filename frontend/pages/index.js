@@ -1,9 +1,48 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { ethers } from 'ethers';
+
+const PAYMENT_AGENT_ADDRESS = '0x938C237a5A1F753fc1770960c31f1FD26D548bAc';
+const CRONOS_RPC = 'https://evm-t3.cronos.org';
+const DEMO_USER = '0xF1c4528A415792c12862CccB8FFfBF4003F8cD5c';
+
+const PAYMENT_AGENT_ABI = [
+  {"inputs":[{"name":"user","type":"address"}],"name":"ruleCount","outputs":[{"name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+  {"inputs":[{"name":"user","type":"address"},{"name":"ruleId","type":"uint256"}],"name":"getRule","outputs":[{"components":[{"name":"token","type":"address"},{"name":"recipient","type":"address"},{"name":"amount","type":"uint256"},{"name":"interval","type":"uint256"},{"name":"lastExecution","type":"uint256"},{"name":"active","type":"bool"},{"name":"condition","type":"string"}],"name":"","type":"tuple"}],"stateMutability":"view","type":"function"}
+];
 
 export default function Home() {
   const [rules, setRules] = useState([]);
   const [stats, setStats] = useState({ total: 0, active: 0, executed: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  async function loadStats() {
+    try {
+      const provider = new ethers.JsonRpcProvider(CRONOS_RPC);
+      const contract = new ethers.Contract(PAYMENT_AGENT_ADDRESS, PAYMENT_AGENT_ABI, provider);
+
+      const count = await contract.ruleCount(DEMO_USER);
+      const total = Number(count);
+      let active = 0;
+      let executed = 0;
+
+      for (let i = 0; i < total; i++) {
+        const rule = await contract.getRule(DEMO_USER, i);
+        if (rule.active) active++;
+        if (rule.lastExecution > 0) executed++;
+      }
+
+      setStats({ total, active, executed });
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading stats:', error);
+      setLoading(false);
+    }
+  }
 
   return (
     <div style={styles.container}>
@@ -18,19 +57,29 @@ export default function Home() {
         <div style={styles.grid}>
           <div style={styles.card}>
             <h3>Total Rules</h3>
-            <p style={styles.stat}>{stats.total}</p>
+            <p style={styles.stat}>{loading ? '...' : stats.total}</p>
+            <p style={styles.sublabel}>On-chain payment rules</p>
           </div>
 
           <div style={styles.card}>
             <h3>Active</h3>
-            <p style={styles.stat}>{stats.active}</p>
+            <p style={styles.stat}>{loading ? '...' : stats.active}</p>
+            <p style={styles.sublabel}>Currently monitoring</p>
           </div>
 
           <div style={styles.card}>
             <h3>Executed</h3>
-            <p style={styles.stat}>{stats.executed}</p>
+            <p style={styles.stat}>{loading ? '...' : stats.executed}</p>
+            <p style={styles.sublabel}>Payments completed</p>
           </div>
         </div>
+
+        {!loading && stats.total > 0 && (
+          <div style={styles.liveIndicator}>
+            <span style={styles.pulse}></span>
+            Agent monitoring live on Railway
+          </div>
+        )}
 
         <div style={styles.section}>
           <h2>How It Works</h2>
@@ -125,5 +174,30 @@ const styles = {
     marginTop: '4rem',
     textAlign: 'center',
     opacity: 0.7
+  },
+  sublabel: {
+    fontSize: '0.875rem',
+    opacity: 0.6,
+    marginTop: '0.5rem'
+  },
+  liveIndicator: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    padding: '1rem',
+    background: '#1a1a1a',
+    borderRadius: '8px',
+    border: '1px solid #2a2',
+    marginTop: '2rem',
+    fontSize: '0.9rem',
+    color: '#2a2'
+  },
+  pulse: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    background: '#2a2',
+    animation: 'pulse 2s ease-in-out infinite'
   }
 };
