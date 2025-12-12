@@ -38,11 +38,16 @@ class SimplePaymentAgent:
             print(f"User {user_address} has {rule_count} rules")
 
             for rule_id in range(rule_count):
-                is_executable = self.contract.functions.isExecutable(user_address, rule_id).call()
+                try:
+                    is_executable = self.contract.functions.isExecutable(user_address, rule_id).call()
 
-                if is_executable:
-                    print(f"Executing rule {rule_id} for {user_address}")
-                    self.execute_payment(user_address, rule_id)
+                    if is_executable:
+                        print(f"✓ Executing rule {rule_id} for {user_address}")
+                        self.execute_payment(user_address, rule_id)
+                    else:
+                        print(f"  Rule {rule_id} not executable yet (waiting for interval or insufficient balance)")
+                except Exception as e:
+                    print(f"  Rule {rule_id} check failed: {str(e)[:100]}")
 
         except Exception as e:
             print(f"Error checking rules: {e}")
